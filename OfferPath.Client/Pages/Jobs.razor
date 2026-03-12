@@ -2,54 +2,120 @@
 @using System.Net.Http.Json
 @using OfferPath.Client.Models
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
-<h3>Jobs</h3>
+<div class="page-header">
+    <div>
+        <h3>Job Applications</h3>
+        <p class="muted-text">Track, filter, and manage your opportunities.</p>
+    </div>
 
-<a href="/jobs/add" class="btn btn-primary mb-3">Add Job</a>
+    <button class="btn-primary-custom" @onclick="GoToAddJob">
+        + Add Application
+    </button>
+</div>
+
+<div class="table-toolbar">
+    <div class="search-box">
+        <input class="search-input" placeholder="Search company or position..."
+               @bind="searchTerm" @bind:event="oninput" />
+    </div>
+
+    <div class="filter-box">
+        <select class="filter-select" @bind="selectedStatus">
+            <option value="">All Statuses</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Offer">Offer</option>
+        </select>
+    </div>
+</div>
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <p style="color:red">@errorMessage</p>
+    <div class="alert-box">@errorMessage</div>
 }
-else if (jobs.Count == 0)
-{
-    <p>No jobs found.</p>
-}
-else
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Company</th>
-                <th>Position</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Applied Date</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var job in jobs)
-            {
+
+<div class="table-card">
+    @if (jobs == null)
+    {
+        <div class="empty-state">
+            <p>Loading applications...</p>
+        </div>
+    }
+    else if (FilteredJobs.Count == 0)
+    {
+        <div class="empty-state">
+            <h4>No applications found</h4>
+            <p>Try changing the search or filter, or add your first application.</p>
+        </div>
+    }
+    else
+    {
+        <table class="jobs-table">
+            <thead>
                 <tr>
-                    <td>@job.Company</td>
-                    <td>@job.Position</td>
-                    <td>@job.Location</td>
-                    <td>@job.Status</td>
-                    <td>@job.AppliedDate.ToShortDateString()</td>
-                    <td>@job.Notes</td>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Applied</th>
+                    <th>Notes</th>
+                    <th style="width: 180px;">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var item in FilteredJobs)
+                {
+                    <tr>
+                        <td>
+                            <div class="table-primary-text">@item.Company</div>
+                        </td>
+                        <td>
+                            <div class="table-primary-text">@item.Position</div>
+                        </td>
+                        <td>@item.Location</td>
+                        <td>
+                            <span class="status-badge @GetStatusClass(item.Status)">
+                                @item.Status
+                            </span>
+                        </td>
+                        <td>@item.AppliedDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <div class="notes-cell">
+                                @item.Notes
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="icon-btn edit-btn" @onclick="() => EditJob(item.Id)">
+                                    Edit
+                                </button>
+                                <button class="icon-btn delete-btn" @onclick="() => DeleteJob(item.Id)">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
 
 @code {
-
     private List<JobApplicationModel>? jobs;
     private string errorMessage = "";
+    private string searchTerm = "";
+    private string selectedStatus = "";
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadJobs();
+    }
+
+    private async Task LoadJobs()
     {
         try
         {
@@ -59,5 +125,53 @@ else
         {
             errorMessage = ex.Message;
         }
+    }
+
+    private List<JobApplicationModel> FilteredJobs =>
+        jobs?
+            .Where(j =>
+                (string.IsNullOrWhiteSpace(searchTerm) ||
+                 j.Company.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                 j.Position.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                &&
+                (string.IsNullOrWhiteSpace(selectedStatus) ||
+                 j.Status == selectedStatus))
+            .ToList()
+        ?? new List<JobApplicationModel>();
+
+    private void GoToAddJob()
+    {
+        Navigation.NavigateTo("/jobs/add");
+    }
+
+    private void EditJob(int id)
+    {
+        Navigation.NavigateTo($"/jobs/edit/{id}");
+    }
+
+    private async Task DeleteJob(int id)
+    {
+        var response = await Http.DeleteAsync($"api/Jobs/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadJobs();
+        }
+        else
+        {
+            errorMessage = "Failed to delete job.";
+        }
+    }
+
+    private string GetStatusClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "applied" => "status-applied",
+            "interview" => "status-interview",
+            "rejected" => "status-rejected",
+            "offer" => "status-offer",
+            _ => ""
+        };
     }
 }

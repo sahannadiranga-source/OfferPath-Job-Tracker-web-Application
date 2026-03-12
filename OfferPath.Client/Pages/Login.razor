@@ -4,24 +4,29 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
-<h3>Login</h3>
+<div class="auth-page">
+    <div class="auth-card">
+        <h2 class="form-title">Sign in</h2>
+        <p class="muted-text">Access your dashboard and manage your applications.</p>
 
-@if (!string.IsNullOrEmpty(message))
-{
-    <div class="alert alert-info">@message</div>
-}
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert-box">@message</div>
+        }
 
-<div class="mb-3">
-    <label>Email</label>
-    <input class="form-control" @bind="loginModel.Email" />
+        <div class="form-group">
+            <label>Email</label>
+            <input class="form-control" @bind="loginModel.Email" />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" @bind="loginModel.Password" />
+        </div>
+
+        <button class="btn-primary-custom auth-submit" @onclick="LoginUser">Login</button>
+    </div>
 </div>
-
-<div class="mb-3">
-    <label>Password</label>
-    <input type="password" class="form-control" @bind="loginModel.Password" />
-</div>
-
-<button class="btn btn-primary" @onclick="LoginUser">Login</button>
 
 @code {
     private LoginModel loginModel = new();
@@ -37,8 +42,8 @@
 
             if (user != null)
             {
-                message = $"Welcome {user.Name}";
-                Navigation.NavigateTo("/jobs");
+                await Task.Delay(300);
+                Navigation.NavigateTo("/dashboard");
             }
         }
         else

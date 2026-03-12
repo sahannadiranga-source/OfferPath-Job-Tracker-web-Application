@@ -1,33 +1,52 @@
 ﻿@page "/dashboard"
+@using System.Net.Http.Json
+@using OfferPath.Client.Models
+@inject HttpClient Http
 
-<h3>Dashboard</h3>
+<div class="page-header">
+    <h3>Dashboard Overview</h3>
+</div>
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="card p-3">
-            <h5>Total Jobs</h5>
-            <p>0</p>
-        </div>
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <h4>Total Jobs</h4>
+        <p>@totalJobs</p>
     </div>
 
-    <div class="col-md-3">
-        <div class="card p-3">
-            <h5>Applied</h5>
-            <p>0</p>
-        </div>
+    <div class="stat-card">
+        <h4>Applied</h4>
+        <p>@appliedCount</p>
     </div>
 
-    <div class="col-md-3">
-        <div class="card p-3">
-            <h5>Interview</h5>
-            <p>0</p>
-        </div>
+    <div class="stat-card">
+        <h4>Interview</h4>
+        <p>@interviewCount</p>
     </div>
 
-    <div class="col-md-3">
-        <div class="card p-3">
-            <h5>Offer</h5>
-            <p>0</p>
-        </div>
+    <div class="stat-card">
+        <h4>Offers</h4>
+        <p>@offerCount</p>
     </div>
 </div>
+
+@code {
+    private List<JobApplicationModel> jobs = new();
+    private int totalJobs;
+    private int appliedCount;
+    private int interviewCount;
+    private int offerCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetFromJsonAsync<List<JobApplicationModel>>("api/Jobs");
+
+        if (result != null)
+        {
+            jobs = result;
+            totalJobs = jobs.Count;
+            appliedCount = jobs.Count(x => x.Status == "Applied");
+            interviewCount = jobs.Count(x => x.Status == "Interview");
+            offerCount = jobs.Count(x => x.Status == "Offer");
+        }
+    }
+}
