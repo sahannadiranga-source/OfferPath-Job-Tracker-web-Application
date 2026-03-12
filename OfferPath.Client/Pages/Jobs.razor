@@ -1,22 +1,63 @@
 ﻿@page "/jobs"
+@using System.Net.Http.Json
+@using OfferPath.Client.Models
+@inject HttpClient Http
 
 <h3>Jobs</h3>
 
 <a href="/jobs/add" class="btn btn-primary mb-3">Add Job</a>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Company</th>
-            <th>Position</th>
-            <th>Status</th>
-            <th>Applied Date</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td colspan="5">No data available</td>
-        </tr>
-    </tbody>
-</table>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p style="color:red">@errorMessage</p>
+}
+else if (jobs.Count == 0)
+{
+    <p>No jobs found.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Position</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Applied Date</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var job in jobs)
+            {
+                <tr>
+                    <td>@job.Company</td>
+                    <td>@job.Position</td>
+                    <td>@job.Location</td>
+                    <td>@job.Status</td>
+                    <td>@job.AppliedDate.ToShortDateString()</td>
+                    <td>@job.Notes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<JobApplicationModel>? jobs;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            jobs = await Http.GetFromJsonAsync<List<JobApplicationModel>>("api/Jobs");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}
