@@ -1,5 +1,40 @@
-﻿<h3>AddJob</h3>
+﻿@page "/jobs/add"
 
-@code {
+<h3>Add Job</h3>
 
-}
+<div class="mb-3">
+    <label>Company</label>
+    <input class="form-control" />
+</div>
+
+<div class="mb-3">
+    <label>Position</label>
+    <input class="form-control" />
+</div>
+
+<div class="mb-3">
+    <label>Location</label>
+    <input class="form-control" />
+</div>
+
+<div class="mb-3">
+    <label>Status</label>
+    <select class="form-control">
+        <option>Applied</option>
+        <option>Interview</option>
+        <option>Rejected</option>
+        <option>Offer</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label>Applied Date</label>
+    <input type="date" class="form-control" />
+</div>
+
+<div class="mb-3">
+    <label>Notes</label>
+    <textarea class="form-control"></textarea>
+</div>
+
+<button class="btn btn-success">Save</button>

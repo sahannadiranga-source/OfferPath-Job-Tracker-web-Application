@@ -1,0 +1,15 @@
+﻿namespace OfferPath.Api.Models
+{
+    public class JobApplication
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+
+        public string Company { get; set; } = "";
+        public string Position { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string Status { get; set; } = "";
+        public DateTime AppliedDate { get; set; }
+        public string Notes { get; set; } = "";
+    }
+}
