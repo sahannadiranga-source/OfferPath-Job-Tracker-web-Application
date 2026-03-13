@@ -1,60 +1,102 @@
 ﻿@page "/jobs/add"
 @using System.Net.Http.Json
 @using OfferPath.Client.Models
+@using OfferPath.Client.Services
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject UserSessionService Session
 
-<div class="form-card">
-    <div class="form-title">Add New Job</div>
+@if (!Session.IsRecruiter)
+{
+    <div class="alert-box">Only recruiters can add jobs.</div>
+}
+else
+{
+    <div class="form-card">
+        <div class="form-title">Create Job Post</div>
 
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <div class="alert-box">@message</div>
-    }
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert-box">@message</div>
+        }
 
-    <div class="form-group">
-        <label>Company</label>
-        <input class="form-control" @bind="job.Company" />
+        <div class="form-group">
+            <label>Company</label>
+            <input class="form-control" @bind="job.Company" />
+        </div>
+
+        <div class="form-group">
+            <label>Position</label>
+            <input class="form-control" @bind="job.Position" />
+        </div>
+
+        <div class="form-group">
+            <label>Location</label>
+            <input class="form-control" @bind="job.Location" />
+        </div>
+
+        <div class="form-group">
+            <label>Job Type</label>
+            <select class="form-control" @bind="job.JobType">
+                <option value="">Select Job Type</option>
+                <option>Full-time</option>
+                <option>Part-time</option>
+                <option>Internship</option>
+                <option>Contract</option>
+                <option>Remote</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Salary</label>
+            <input class="form-control" @bind="job.Salary" />
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <input class="form-control" @bind="job.Category" />
+        </div>
+
+        <div class="form-group">
+            <label>Experience Level</label>
+            <select class="form-control" @bind="job.ExperienceLevel">
+                <option value="">Select Level</option>
+                <option>Entry Level</option>
+                <option>Junior</option>
+                <option>Mid Level</option>
+                <option>Senior</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Posted Date</label>
+            <input type="date" class="form-control" @bind="job.PostedDate" />
+        </div>
+
+        <div class="form-group">
+            <label>Deadline</label>
+            <input type="date" class="form-control" @bind="job.Deadline" />
+        </div>
+
+        <div class="form-group">
+            <label>Job Image URL</label>
+            <input class="form-control" @bind="job.ImageUrl" />
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea class="form-control" rows="5" @bind="job.Description"></textarea>
+        </div>
+
+        <button class="btn-primary-custom" @onclick="SaveJob">Publish Job</button>
     </div>
-
-    <div class="form-group">
-        <label>Position</label>
-        <input class="form-control" @bind="job.Position" />
-    </div>
-
-    <div class="form-group">
-        <label>Location</label>
-        <input class="form-control" @bind="job.Location" />
-    </div>
-
-    <div class="form-group">
-        <label>Status</label>
-        <select class="form-control" @bind="job.Status">
-            <option value="">Select Status</option>
-            <option value="Applied">Applied</option>
-            <option value="Interview">Interview</option>
-            <option value="Rejected">Rejected</option>
-            <option value="Offer">Offer</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Applied Date</label>
-        <input type="date" class="form-control" @bind="job.AppliedDate" />
-    </div>
-
-    <div class="form-group">
-        <label>Notes</label>
-        <textarea class="form-control" @bind="job.Notes"></textarea>
-    </div>
-
-    <button class="btn-primary-custom" @onclick="SaveJob">Save Job</button>
-</div>
+}
 
 @code {
     private JobApplicationModel job = new()
     {
-        AppliedDate = DateTime.Today
+        PostedDate = DateTime.Today,
+        Deadline = DateTime.Today.AddDays(30)
     };
 
     private string message = "";
@@ -65,14 +107,14 @@
 
         if (response.IsSuccessStatusCode)
         {
-            message = "Job saved successfully.";
+            message = "Job published successfully.";
             await Task.Delay(700);
             Navigation.NavigateTo("/jobs");
         }
         else
         {
             var error = await response.Content.ReadAsStringAsync();
-            message = "Failed to save job: " + error;
+            message = "Failed to publish job: " + error;
         }
     }
 }

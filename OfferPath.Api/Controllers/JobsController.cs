@@ -33,6 +33,9 @@ namespace OfferPath.Api.Controllers
                 return NotFound("Job not found.");
             }
 
+            job.ViewCount += 1;
+            _context.SaveChanges();
+
             return Ok(job);
         }
 
@@ -45,9 +48,15 @@ namespace OfferPath.Api.Controllers
                 Company = dto.Company,
                 Position = dto.Position,
                 Location = dto.Location,
-                Status = dto.Status,
-                AppliedDate = dto.AppliedDate,
-                Notes = dto.Notes
+                JobType = dto.JobType,
+                Salary = dto.Salary,
+                Category = dto.Category,
+                ExperienceLevel = dto.ExperienceLevel,
+                PostedDate = dto.PostedDate,
+                Deadline = dto.Deadline,
+                Description = dto.Description,
+                ImageUrl = dto.ImageUrl,
+                ViewCount = 0
             };
 
             _context.JobApplications.Add(job);
@@ -69,9 +78,14 @@ namespace OfferPath.Api.Controllers
             job.Company = dto.Company;
             job.Position = dto.Position;
             job.Location = dto.Location;
-            job.Status = dto.Status;
-            job.AppliedDate = dto.AppliedDate;
-            job.Notes = dto.Notes;
+            job.JobType = dto.JobType;
+            job.Salary = dto.Salary;
+            job.Category = dto.Category;
+            job.ExperienceLevel = dto.ExperienceLevel;
+            job.PostedDate = dto.PostedDate;
+            job.Deadline = dto.Deadline;
+            job.Description = dto.Description;
+            job.ImageUrl = dto.ImageUrl;
 
             _context.SaveChanges();
 

@@ -7,7 +7,7 @@
 <div class="auth-page">
     <div class="auth-card">
         <h2 class="form-title">Create account</h2>
-        <p class="muted-text">Get started and keep every application organized.</p>
+        <p class="muted-text">Choose your account type and get started.</p>
 
         @if (!string.IsNullOrEmpty(message))
         {
@@ -27,6 +27,14 @@
         <div class="form-group">
             <label>Password</label>
             <input type="password" class="form-control" @bind="registerModel.Password" />
+        </div>
+
+        <div class="form-group">
+            <label>Account Type</label>
+            <select class="form-control" @bind="registerModel.Role">
+                <option value="JobSeeker">Job Seeker</option>
+                <option value="Recruiter">Recruiter</option>
+            </select>
         </div>
 
         <button class="btn-primary-custom auth-submit" @onclick="RegisterUser">Create Account</button>

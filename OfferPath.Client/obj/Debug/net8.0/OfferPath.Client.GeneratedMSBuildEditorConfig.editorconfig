@@ -52,6 +52,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Docker/OfferPath-Job-Tracker-web-Application/OfferPath/OfferPath.Client/Pages/JobDetails.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSm9iRGV0YWlscy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Docker/OfferPath-Job-Tracker-web-Application/OfferPath/OfferPath.Client/Pages/Jobs.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSm9icy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 

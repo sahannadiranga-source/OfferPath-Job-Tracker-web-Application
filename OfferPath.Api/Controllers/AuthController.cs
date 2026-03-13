@@ -2,7 +2,7 @@
 using OfferPath.Api.Data;
 using OfferPath.Api.Dtos;
 using OfferPath.Api.Models;
-//jsdvkjvds
+
 namespace OfferPath.Api.Controllers
 {
     [ApiController]
@@ -30,7 +30,8 @@ namespace OfferPath.Api.Controllers
             {
                 Name = dto.Name,
                 Email = dto.Email,
-                PasswordHash = dto.Password
+                PasswordHash = dto.Password,
+                Role = dto.Role
             };
 
             _context.Users.Add(user);
@@ -42,7 +43,8 @@ namespace OfferPath.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginDto dto)
         {
-            var user = _context.Users.FirstOrDefault(x => x.Email == dto.Email && x.PasswordHash == dto.Password);
+            var user = _context.Users.FirstOrDefault(x =>
+                x.Email == dto.Email && x.PasswordHash == dto.Password);
 
             if (user == null)
             {
@@ -53,7 +55,8 @@ namespace OfferPath.Api.Controllers
             {
                 user.Id,
                 user.Name,
-                user.Email
+                user.Email,
+                user.Role
             });
         }
     }

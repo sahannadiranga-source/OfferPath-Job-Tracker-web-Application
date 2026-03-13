@@ -1,13 +1,15 @@
 ﻿@page "/login"
 @using System.Net.Http.Json
 @using OfferPath.Client.Models
+@using OfferPath.Client.Services
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject UserSessionService Session
 
 <div class="auth-page">
     <div class="auth-card">
         <h2 class="form-title">Sign in</h2>
-        <p class="muted-text">Access your dashboard and manage your applications.</p>
+        <p class="muted-text">Access your account and continue.</p>
 
         @if (!string.IsNullOrEmpty(message))
         {
@@ -42,8 +44,18 @@
 
             if (user != null)
             {
+                Session.CurrentUser = user;
+
                 await Task.Delay(300);
-                Navigation.NavigateTo("/dashboard");
+
+                if (user.Role == "Recruiter")
+                {
+                    Navigation.NavigateTo("/dashboard");
+                }
+                else
+                {
+                    Navigation.NavigateTo("/jobs");
+                }
             }
         }
         else

@@ -1,0 +1,79 @@
+﻿@page "/jobs/details/{Id:int}"
+@using System.Net.Http.Json
+@using OfferPath.Client.Models
+@using OfferPath.Client.Services
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject UserSessionService Session
+
+<div class="page-card">
+    @if (job == null)
+    {
+        <p>Loading job details...</p>
+    }
+    else
+    {
+        @if (!string.IsNullOrWhiteSpace(job.ImageUrl))
+        {
+            <img src="@job.ImageUrl" alt="Job Image" class="job-detail-image" />
+        }
+
+        <div class="job-details-header">
+            <div>
+                <h2 class="form-title">@job.Position</h2>
+                <p class="muted-text">@job.Company • @job.Location</p>
+            </div>
+
+            @if (!Session.IsRecruiter)
+            {
+                <button class="btn-primary-custom" @onclick="ApplyNow">
+                    Apply Now
+                </button>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <div class="alert-box" style="margin-top:16px;">@message</div>
+        }
+
+        <div class="job-meta-grid">
+            <div><strong>Job Type:</strong> @job.JobType</div>
+            <div><strong>Salary:</strong> @job.Salary</div>
+            <div><strong>Category:</strong> @job.Category</div>
+            <div><strong>Experience:</strong> @job.ExperienceLevel</div>
+            <div><strong>Posted Date:</strong> @job.PostedDate.ToString("yyyy-MM-dd")</div>
+            <div><strong>Deadline:</strong> @job.Deadline.ToString("yyyy-MM-dd")</div>
+            <div><strong>Views:</strong> @job.ViewCount</div>
+        </div>
+
+        <div class="form-group" style="margin-top:24px;">
+            <label>Description</label>
+            <div>@job.Description</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private JobApplicationModel? job;
+    private string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        job = await Http.GetFromJsonAsync<JobApplicationModel>($"api/Jobs/{Id}");
+    }
+
+    private void ApplyNow()
+    {
+        if (!Session.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        message = "Application submitted successfully.";
+    }
+}

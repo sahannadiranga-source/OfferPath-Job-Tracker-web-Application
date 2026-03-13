@@ -1,61 +1,103 @@
 ﻿@page "/jobs/edit/{Id:int}"
 @using System.Net.Http.Json
 @using OfferPath.Client.Models
+@using OfferPath.Client.Services
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject UserSessionService Session
 
-<div class="form-card">
-    <div class="form-title">Edit Job</div>
+@if (!Session.IsRecruiter)
+{
+    <div class="alert-box">Only recruiters can edit jobs.</div>
+}
+else
+{
+    <div class="form-card">
+        <div class="form-title">Edit Job Post</div>
 
-    @if (!string.IsNullOrEmpty(message))
-    {
-        <div class="alert-box">@message</div>
-    }
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert-box">@message</div>
+        }
 
-    @if (job == null)
-    {
-        <p>Loading job details...</p>
-    }
-    else
-    {
-        <div class="form-group">
-            <label>Company</label>
-            <input class="form-control" @bind="job.Company" />
-        </div>
+        @if (job == null)
+        {
+            <p>Loading job details...</p>
+        }
+        else
+        {
+            <div class="form-group">
+                <label>Company</label>
+                <input class="form-control" @bind="job.Company" />
+            </div>
 
-        <div class="form-group">
-            <label>Position</label>
-            <input class="form-control" @bind="job.Position" />
-        </div>
+            <div class="form-group">
+                <label>Position</label>
+                <input class="form-control" @bind="job.Position" />
+            </div>
 
-        <div class="form-group">
-            <label>Location</label>
-            <input class="form-control" @bind="job.Location" />
-        </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input class="form-control" @bind="job.Location" />
+            </div>
 
-        <div class="form-group">
-            <label>Status</label>
-            <select class="form-control" @bind="job.Status">
-                <option value="Applied">Applied</option>
-                <option value="Interview">Interview</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Offer">Offer</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label>Job Type</label>
+                <select class="form-control" @bind="job.JobType">
+                    <option value="">Select Job Type</option>
+                    <option>Full-time</option>
+                    <option>Part-time</option>
+                    <option>Internship</option>
+                    <option>Contract</option>
+                    <option>Remote</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label>Applied Date</label>
-            <input type="date" class="form-control" @bind="job.AppliedDate" />
-        </div>
+            <div class="form-group">
+                <label>Salary</label>
+                <input class="form-control" @bind="job.Salary" />
+            </div>
 
-        <div class="form-group">
-            <label>Notes</label>
-            <textarea class="form-control" @bind="job.Notes"></textarea>
-        </div>
+            <div class="form-group">
+                <label>Category</label>
+                <input class="form-control" @bind="job.Category" />
+            </div>
 
-        <button class="btn-primary-custom" @onclick="UpdateJob">Update Job</button>
-    }
-</div>
+            <div class="form-group">
+                <label>Experience Level</label>
+                <select class="form-control" @bind="job.ExperienceLevel">
+                    <option value="">Select Level</option>
+                    <option>Entry Level</option>
+                    <option>Junior</option>
+                    <option>Mid Level</option>
+                    <option>Senior</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Posted Date</label>
+                <input type="date" class="form-control" @bind="job.PostedDate" />
+            </div>
+
+            <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" class="form-control" @bind="job.Deadline" />
+            </div>
+
+            <div class="form-group">
+                <label>Job Image URL</label>
+                <input class="form-control" @bind="job.ImageUrl" />
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea class="form-control" rows="5" @bind="job.Description"></textarea>
+            </div>
+
+            <button class="btn-primary-custom" @onclick="UpdateJob">Update Job</button>
+        }
+    </div>
+}
 
 @code {
     [Parameter]
@@ -66,7 +108,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        job = await Http.GetFromJsonAsync<JobApplicationModel>($"api/Jobs/{Id}");
+        if (Session.IsRecruiter)
+        {
+            job = await Http.GetFromJsonAsync<JobApplicationModel>($"api/Jobs/{Id}");
+        }
     }
 
     private async Task UpdateJob()

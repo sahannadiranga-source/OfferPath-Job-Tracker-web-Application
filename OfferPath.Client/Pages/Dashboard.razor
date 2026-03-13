@@ -1,52 +1,211 @@
 ﻿@page "/dashboard"
 @using System.Net.Http.Json
 @using OfferPath.Client.Models
+@using OfferPath.Client.Services
 @inject HttpClient Http
+@inject UserSessionService Session
+@inject NavigationManager Navigation
 
-<div class="page-header">
-    <h3>Dashboard Overview</h3>
-</div>
-
-<div class="dashboard-grid">
-    <div class="stat-card">
-        <h4>Total Jobs</h4>
-        <p>@totalJobs</p>
+@if (!Session.IsRecruiter)
+{
+    <div class="alert-box">Only recruiters can access the dashboard.</div>
+}
+else
+{
+    <div class="page-header">
+        <div>
+            <h3>Recruiter Dashboard</h3>
+            <p class="muted-text">Track job performance and manage postings easily.</p>
+        </div>
     </div>
 
-    <div class="stat-card">
-        <h4>Applied</h4>
-        <p>@appliedCount</p>
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <h4>Total Job Posts</h4>
+            <p>@totalJobs</p>
+        </div>
+
+        <div class="stat-card">
+            <h4>Total Views</h4>
+            <p>@totalViews</p>
+        </div>
+
+        <div class="stat-card">
+            <h4>Closing Soon</h4>
+            <p>@closingSoonCount</p>
+        </div>
+
+        <div class="stat-card">
+            <h4>Internships</h4>
+            <p>@internshipCount</p>
+        </div>
     </div>
 
-    <div class="stat-card">
-        <h4>Interview</h4>
-        <p>@interviewCount</p>
-    </div>
+    <div class="dashboard-sections">
+        <div class="dashboard-panel">
+            <div class="panel-header">
+                <h4>Latest Job Posts</h4>
+                <span class="panel-badge">@latestJobs.Count</span>
+            </div>
 
-    <div class="stat-card">
-        <h4>Offers</h4>
-        <p>@offerCount</p>
+            @if (latestJobs.Count == 0)
+            {
+                <div class="empty-state">
+                    <p>No recent job posts found.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var job in latestJobs)
+                {
+                    <div class="job-summary-card">
+                        <div class="job-summary-main">
+                            <div class="job-title">@job.Position</div>
+                            <div class="job-subtitle">@job.Company • @job.Location</div>
+                        </div>
+                        <div class="job-summary-meta">
+                            <div>Posted: @job.PostedDate.ToString("yyyy-MM-dd")</div>
+                            <div>Type: @job.JobType</div>
+                        </div>
+                        <button class="icon-btn view-btn" @onclick="() => OpenJob(job.Id)">View</button>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="dashboard-panel">
+            <div class="panel-header">
+                <h4>Top Viewed Jobs</h4>
+                <span class="panel-badge">@topViewedJobs.Count</span>
+            </div>
+
+            @if (topViewedJobs.Count == 0)
+            {
+                <div class="empty-state">
+                    <p>No viewed jobs available yet.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var job in topViewedJobs)
+                {
+                    <div class="job-summary-card">
+                        <div class="job-summary-main">
+                            <div class="job-title">@job.Position</div>
+                            <div class="job-subtitle">@job.Company • @job.Location</div>
+                        </div>
+                        <div class="job-summary-meta">
+                            <div>Views: @job.ViewCount</div>
+                            <div>Deadline: @job.Deadline.ToString("yyyy-MM-dd")</div>
+                        </div>
+                        <button class="icon-btn view-btn" @onclick="() => OpenJob(job.Id)">View</button>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="dashboard-panel">
+            <div class="panel-header">
+                <h4>Expiring Soon Jobs</h4>
+                <span class="panel-badge">@expiringSoonJobs.Count</span>
+            </div>
+
+            @if (expiringSoonJobs.Count == 0)
+            {
+                <div class="empty-state">
+                    <p>No jobs expiring in the next 7 days.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var job in expiringSoonJobs)
+                {
+                    <div class="job-summary-card">
+                        <div class="job-summary-main">
+                            <div class="job-title">@job.Position</div>
+                            <div class="job-subtitle">@job.Company • @job.Location</div>
+                        </div>
+                        <div class="job-summary-meta">
+                            <div>Deadline: @job.Deadline.ToString("yyyy-MM-dd")</div>
+                            <div>@GetDaysLeft(job.Deadline)</div>
+                        </div>
+                        <button class="icon-btn edit-btn" @onclick="() => EditJob(job.Id)">Edit</button>
+                    </div>
+                }
+            }
+        </div>
     </div>
-</div>
+}
 
 @code {
     private List<JobApplicationModel> jobs = new();
+
     private int totalJobs;
-    private int appliedCount;
-    private int interviewCount;
-    private int offerCount;
+    private int totalViews;
+    private int closingSoonCount;
+    private int internshipCount;
+
+    private List<JobApplicationModel> latestJobs = new();
+    private List<JobApplicationModel> topViewedJobs = new();
+    private List<JobApplicationModel> expiringSoonJobs = new();
 
     protected override async Task OnInitializedAsync()
     {
+        if (!Session.IsRecruiter)
+            return;
+
         var result = await Http.GetFromJsonAsync<List<JobApplicationModel>>("api/Jobs");
 
         if (result != null)
         {
             jobs = result;
+
             totalJobs = jobs.Count;
-            appliedCount = jobs.Count(x => x.Status == "Applied");
-            interviewCount = jobs.Count(x => x.Status == "Interview");
-            offerCount = jobs.Count(x => x.Status == "Offer");
+            totalViews = jobs.Sum(x => x.ViewCount);
+            closingSoonCount = jobs.Count(x => x.Deadline >= DateTime.Today && x.Deadline <= DateTime.Today.AddDays(7));
+            internshipCount = jobs.Count(x => x.JobType == "Internship");
+
+            latestJobs = jobs
+                .OrderByDescending(x => x.PostedDate)
+                .Take(5)
+                .ToList();
+
+            topViewedJobs = jobs
+                .OrderByDescending(x => x.ViewCount)
+                .Take(5)
+                .ToList();
+
+            expiringSoonJobs = jobs
+                .Where(x => x.Deadline >= DateTime.Today && x.Deadline <= DateTime.Today.AddDays(7))
+                .OrderBy(x => x.Deadline)
+                .Take(5)
+                .ToList();
         }
+    }
+
+    private string GetDaysLeft(DateTime deadline)
+    {
+        var days = (deadline.Date - DateTime.Today).Days;
+
+        if (days < 0)
+            return "Expired";
+
+        if (days == 0)
+            return "Ends today";
+
+        if (days == 1)
+            return "1 day left";
+
+        return $"{days} days left";
+    }
+
+    private void OpenJob(int id)
+    {
+        Navigation.NavigateTo($"/jobs/details/{id}");
+    }
+
+    private void EditJob(int id)
+    {
+        Navigation.NavigateTo($"/jobs/edit/{id}");
     }
 }
