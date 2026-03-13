@@ -17,11 +17,19 @@
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="app-loading-screen">
+            <div class="loading-brand">
+                <img src="logo.png" alt="OfferPath Logo" class="loading-logo" />
+                <h1>OfferPath</h1>
+                <p>Loading your opportunities...</p>
+            </div>
+
+            <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
 
     <div id="blazor-error-ui">

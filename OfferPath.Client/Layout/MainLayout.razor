@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+﻿@* @inherits LayoutComponentBase
 
 <div class="app-shell">
    
@@ -9,6 +9,19 @@
             <h2 class="page-title">OfferPath</h2>
             <span class="page-subtitle">Dashboard</span>
         </div>
+
+        <div class="content-area">
+            @Body
+        </div>
+    </main>
+</div>
+ *@
+
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <main class="main-content">
+        <NavMenu />
 
         <div class="content-area">
             @Body

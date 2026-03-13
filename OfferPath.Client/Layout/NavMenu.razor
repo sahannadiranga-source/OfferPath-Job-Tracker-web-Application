@@ -1,4 +1,4 @@
-﻿@implements IDisposable
+﻿@* @implements IDisposable
 @using OfferPath.Client.Services
 @inject UserSessionService Session
 @inject NavigationManager Navigation
@@ -19,6 +19,77 @@
                 Dashboard
             </NavLink>
         }
+    </div>
+
+    <div class="nav-right">
+        @if (!Session.IsLoggedIn)
+        {
+            <NavLink href="/login" class="auth-link">Login</NavLink>
+            <NavLink href="/register" class="auth-link secondary">Register</NavLink>
+        }
+        else
+        {
+            <div class="user-panel horizontal-user-panel">
+                <div class="user-name">@Session.CurrentUser?.Name</div>
+                <div class="user-role">@Session.CurrentUser?.Role</div>
+            </div>
+
+            <button type="button" class="logout-btn" @onclick="Logout">Logout</button>
+        }
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Session.OnChange += StateHasChanged;
+    }
+
+    private void Logout()
+    {
+        Session.Logout();
+        Navigation.NavigateTo("/", true);
+    }
+
+    public void Dispose()
+    {
+        Session.OnChange -= StateHasChanged;
+    }
+} *@
+
+@implements IDisposable
+@using OfferPath.Client.Services
+@inject UserSessionService Session
+@inject NavigationManager Navigation
+
+<div class="top-navbar">
+    <div class="nav-left">
+        <NavLink href="/" Match="NavLinkMatch.All" class="brand-link">
+            <div class="brand-wrap">
+                <img src="logo.png" alt="OfferPath Logo" class="brand-logo" />
+                <div class="brand-text">
+                    <span class="brand-title">OfferPath</span>
+                    <span class="brand-tagline">Track your next opportunity</span>
+                </div>
+            </div>
+        </NavLink>
+
+        <div class="nav-links">
+            <NavLink href="/" Match="NavLinkMatch.All" class="menu-link">
+                Home
+            </NavLink>
+
+            <NavLink href="/jobs" class="menu-link">
+                Jobs
+            </NavLink>
+
+            @if (Session.IsLoggedIn && Session.IsRecruiter)
+            {
+                <NavLink href="/dashboard" class="menu-link">
+                    Dashboard
+                </NavLink>
+            }
+        </div>
     </div>
 
     <div class="nav-right">
